@@ -1,26 +1,68 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import NexmoClient from "nexmo-client";
+import { useEffect, useRef, useState } from "react";
+import "./App.css";
 
-function App() {
+const USER_JWT = "";
+
+export const App = () => {
+  const [nexmoApp, setNexmoApp] = useState<any>(null);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [status, setStatus] = useState("");
+  const [callInProgress, setCallInProgress] = useState(false);
+  const callButtonRef = useRef<HTMLButtonElement>(null);
+  const hangupButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const nexmoApp_ = await new NexmoClient({ debug: true }).createSession(
+          USER_JWT
+        );
+        setNexmoApp(nexmoApp_);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  }, []);
+
+  const handleClickCall = (event: any) => {
+    event.preventDefault();
+    if (phoneNumber !== "") {
+      nexmoApp.callServer(phoneNumber);
+    } else {
+      setStatus("Please enter your phone number.");
+    }
+
+    nexmoApp.on("member:call", (member: any, call: any) => {
+      hangupButtonRef.current?.addEventListener("click", () => {
+        call.hangUp();
+      });
+    });
+
+    nexmoApp.on("call:status:changed", (call: any) => {
+      setStatus(`Call status: ${call.status}`);
+      if (call.status === call.CALL_STATUS.STARTED) {
+        setCallInProgress(true);
+      }
+      if (call.status === call.CALL_STATUS.COMPLETED) {
+        setCallInProgress(false);
+      }
+    });
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <input
+        value={phoneNumber}
+        onChange={(event) => setPhoneNumber(event.target.value)}
+      />
+      <button id="call" ref={callButtonRef} onClick={handleClickCall} disabled={callInProgress}>
+        Call
+      </button>
+      <button id="hangup" ref={hangupButtonRef} disabled={!callInProgress}>
+        Hangup
+      </button>
+      <div id="status">{status}</div>
     </div>
   );
-}
-
-export default App;
+};
