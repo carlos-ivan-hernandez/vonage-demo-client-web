@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
 const userJwt = process.env.REACT_APP_USER_JWT ?? "";
+const nexmoApiUrl = process.env.REACT_APP_API_URL ?? "";
 
 export const App = () => {
   const [nexmoApp, setNexmoApp] = useState<any>(null);
@@ -15,7 +16,7 @@ export const App = () => {
   useEffect(() => {
     (async () => {
       try {
-        const nexmoApp_ = await new NexmoClient({ debug: false }).createSession(
+        const nexmoApp_ = await new NexmoClient({ nexmo_api_url: nexmoApiUrl, debug: false }).createSession(
           userJwt
         );
         setNexmoApp(nexmoApp_);
