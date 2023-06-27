@@ -2,7 +2,7 @@ import NexmoClient from "nexmo-client";
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
-const USER_JWT = "";
+const userJwt = process.env.REACT_APP_USER_JWT ?? "";
 
 export const App = () => {
   const [nexmoApp, setNexmoApp] = useState<any>(null);
@@ -15,8 +15,8 @@ export const App = () => {
   useEffect(() => {
     (async () => {
       try {
-        const nexmoApp_ = await new NexmoClient({ debug: true }).createSession(
-          USER_JWT
+        const nexmoApp_ = await new NexmoClient({ debug: false }).createSession(
+          userJwt
         );
         setNexmoApp(nexmoApp_);
       } catch (error) {
@@ -43,8 +43,7 @@ export const App = () => {
       setStatus(`Call status: ${call.status}`);
       if (call.status === call.CALL_STATUS.STARTED) {
         setCallInProgress(true);
-      }
-      if (call.status === call.CALL_STATUS.COMPLETED) {
+      } else {
         setCallInProgress(false);
       }
     });
@@ -56,7 +55,12 @@ export const App = () => {
         value={phoneNumber}
         onChange={(event) => setPhoneNumber(event.target.value)}
       />
-      <button id="call" ref={callButtonRef} onClick={handleClickCall} disabled={callInProgress}>
+      <button
+        id="call"
+        ref={callButtonRef}
+        onClick={handleClickCall}
+        disabled={callInProgress}
+      >
         Call
       </button>
       <button id="hangup" ref={hangupButtonRef} disabled={!callInProgress}>
