@@ -7,7 +7,7 @@ frontend:
     build:
       commands:
         - yarn run build
-          - echo "REACT_APP_API_URL=$REACT_APP_API_URL" >> build/.env
+        - echo "REACT_APP_API_URL=$REACT_APP_API_URL" >> build/.env
         - echo "REACT_APP_USER_JWT=$REACT_APP_USER_JWT" >> build/.env
   artifacts:
     baseDirectory: build
